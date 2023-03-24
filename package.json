@@ -1,10 +1,10 @@
 {
-  "name": "plugin-name",
-  "description": "logseq plugin",
-  "author": "PLUGIN-AUTHOR",
+  "name": "logseq-plugin-rakuten-books",
+  "description": "Utilize Rakuten books API to import book data",
+  "author": "YU000jp",
   "logseq": {
-    "id": "PLUGIN-NAME",
-    "title": "PLUGIN-NAME",
+    "id": "Rakuten-books",
+    "title": "Rakuten-books",
     "icon": "./icon.svg"
   },
   "main": "dist/index.html",
@@ -17,7 +17,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@logseq/libs": "latest"
+    "@logseq/libs": "latest",
+    "logseq-dateutils": "^0.0.26",
+    "sweetalert2": "^11.7.3"
   },
   "devDependencies": {
     "parcel": "latest"
