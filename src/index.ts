@@ -2,7 +2,7 @@ import '@logseq/libs'; //https://plugins-doc.logseq.com/
 import { getDateForPage } from 'logseq-dateutils';//https://github.com/hkgnp/logseq-dateutils
 import { logseq as PL } from "../package.json";
 const pluginId = PL.id; //set plugin id from package.json
-import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
+//import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
 import Swal from 'sweetalert2';//https://sweetalert2.github.io/
 
 
@@ -20,10 +20,10 @@ const main = () => {
 
   /* user setting */
   // https://logseq.github.io/plugins/types/SettingSchemaDesc.html
-  const settingsTemplate: SettingSchemaDesc[] = [
+  // const settingsTemplate: SettingSchemaDesc[] = [
 
-  ];
-  logseq.useSettingsSchema(settingsTemplate);
+  // ];
+  // logseq.useSettingsSchema(settingsTemplate);
 
   //open_toolbar
   logseq.App.registerUIItem("toolbar", {
@@ -222,7 +222,7 @@ const model = {
                                     if (selectedBook.largeImageUrl) {
                                       itemProperties["cover"] = selectedBook.largeImageUrl;
                                     }
-                                    if (getDate && getDate !=="[[NaN/aN/aN]]") {
+                                    if (getDate && getDate !== "[[NaN/aN/aN]]" && getDate !== "NaN/aN/aN") {
                                       itemProperties["sales"] = getDate;
                                     }
                                     itemProperties["tags"] = ["Reading"];
@@ -278,6 +278,8 @@ const model = {
                       });
                     }
 
+                  }else{
+                    logseq.UI.showMsg("検索結果が見つかりませんでした", "warning");
                   }
                 })
                 .catch((error) => {
