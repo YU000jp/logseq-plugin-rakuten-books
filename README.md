@@ -6,7 +6,7 @@
 
 - [楽天ブックス](https://books.rakuten.co.jp/book/?l-id=ebook-header-navi-book)あるいは[楽天Kobo](https://books.rakuten.co.jp/e-book/computer/?l-id=parts-genrenavi-e-book-computer)のデータベースを検索し、Logseqにタイトルページを作成するプラグイン
 
-> 手持ちの本で読書メモをとる際に活用できると思います。(利用にあたって楽天アカウントは一切不要です)
+> 手持ちの本で読書メモをとる際にすばやく活用できると思います。(利用にあたって楽天アカウントは一切不要です)
 
 [![latest release version](https://img.shields.io/github/v/release/YU000jp/logseq-plugin-rakuten-books)](https://github.com/YU000jp/logseq-plugin-rakuten-books/releases)
 [![License](https://img.shields.io/github/license/YU000jp/logseq-plugin-rakuten-books?color=blue)](https://github.com/YU000jp/logseq-plugin-rakuten-books/blob/main/LICENSE)
