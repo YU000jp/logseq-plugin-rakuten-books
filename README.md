@@ -4,7 +4,7 @@
 
 > Rakuten books is a site from Japan.
 
-- 楽天ブックスあるいは楽天Koboのデータベースから検索し、Logseqにタイトルページを作成するプラグイン
+- [楽天ブックス](https://books.rakuten.co.jp/book/?l-id=ebook-header-navi-book)あるいは[楽天Kobo](https://books.rakuten.co.jp/e-book/computer/?l-id=parts-genrenavi-e-book-computer)のデータベースから検索し、Logseqにタイトルページを作成するプラグイン
 
 > 手持ちの本で読書メモをとる際に活用できると思います。(利用にあたって楽天アカウントは一切不要です)
 
