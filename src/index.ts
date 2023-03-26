@@ -11,7 +11,6 @@ import Swal from 'sweetalert2';//https://sweetalert2.github.io/
 //テストフォーム https://webservice.rakuten.co.jp/explorer/api/BooksTotal/Search
 
 //参考リンク
-//fetchを使って楽天商品検索APIから商品情報を取得する https://kokoniarukoto.dev/blog/rakuten-api-item/
 //<dialog>: ダイアログ要素 https://developer.mozilla.org/ja/docs/Web/HTML/Element/dialog
 
 
@@ -30,7 +29,7 @@ const main = () => {
   logseq.App.registerUIItem("toolbar", {
     key: pluginId,
     template: `
-    <div data-on-click="OpenToolbarRakuten" style="font-size:20px;color:red">R</div>
+    <div data-on-click="OpenToolbarRakuten" style="font-size:20px;color:#bf0000">R</div>
     `,
   });
 
@@ -79,9 +78,12 @@ const model = {
       margin:1.5em;
     }
     dialog#appDialog{
-      outline: 3px double red;
+      outline: 3px double #bf0000;
       outline-offset: 3px;
       border-radius: 10px;
+    }
+    dialog#appDialog h1{
+      color: #bf0000;
     }
     div#app{
       background:unset;backdrop-filter:blur(40px);
@@ -196,48 +198,69 @@ const model = {
                                 confirmButtonColor: '#3085d6',
                                 cancelButtonColor: '#d33',
                               }).then(async (result) => {
-                                if (result.isConfirmed) {
+                                if (result.isConfirmed) {//true
+                                  //"Reading"ページの作成
+                                  const MainPageObj = await logseq.Editor.getPage("Reading") || [];//ページチェック
+                                  if (Object.keys(MainPageObj).length === 0) {//ページが存在しない場合
+                                    const createMainPage = await logseq.Editor.createPage("Reading", {}, { redirect: false, createFirstBlock: true });
+                                    if (createMainPage) {
+                                      await logseq.Editor.prependBlockInPage(createMainPage.uuid, "{{query (page-tags Reading)}}");
+                                    }
+                                  }
                                   //ページを追加する処理
                                   const selectedBook = data.Items.find((item) => item.Item.title === selectedTitle)?.Item;// 選択された書籍の情報を取得
                                   if (selectedBook) {
+                                    const userConfigs = await logseq.App.getUserConfigs();
+                                    const getDate = await getDateForPage(new Date(selectedBook.salesDate), userConfigs.preferredDateFormat);
+                                    let itemProperties = {};
+                                    if (selectedBook.author) {
+                                      itemProperties["author"] = selectedBook.author;
+                                    }
+                                    if (selectedBook.publisherName) {
+                                      itemProperties["publisher"] = selectedBook.publisherName;
+                                    }
+                                    if (selectedBook.largeImageUrl) {
+                                      itemProperties["cover"] = selectedBook.largeImageUrl;
+                                    }
+                                    if (getDate) {
+                                      itemProperties["sales"] = getDate;
+                                    }
+                                    itemProperties["tags"] = ["Reading"];
                                     const createPage = await logseq.Editor.createPage(
                                       `本/${selectedTitle}`,
-                                      {
-                                        author: selectedBook.author,
-                                        publisher: selectedBook.publisherName,
-                                      },
+                                      itemProperties,
                                       {
                                         redirect: true,
                                         createFirstBlock: true,
                                       });
                                     if (createPage) {
-                                      const userConfigs = await logseq.App.getUserConfigs();
-                                      const getDate = await getDateForPage(new Date(selectedBook.salesDate), userConfigs.preferredDateFormat);
-                                      const prependBlock = await logseq.Editor.prependBlockInPage(createPage.uuid,
-                                        selectedBook.largeImageUrl + "\n"
-                                        + `(出版日) ${getDate} | [楽天サイトへ](${selectedBook.affiliateUrl})\n
-                                        `);
-                                      if (prependBlock) {
-                                        await logseq.Editor.insertBlock(prependBlock.uuid, `(内容紹介「BOOK」データベースより)\n#+BEGIN_QUOTE\n${selectedBook.itemCaption}\n#+END_QUOTE\n`);
-                                      }
-                                      await Swal.fire(
-                                        'ページが作成されました。',
-                                        `[[本/${selectedTitle}]]`,
-                                        'success'
-                                      ).then((ok) => {
-                                        if (ok) {
-                                          logseq.hideMainUI();
+                                      try {
+                                        let content;
+                                        if (selectedBook.itemCaption) {
+                                          content = `(内容紹介「BOOK」データベースより) | [楽天サイトへ](${selectedBook.affiliateUrl})\n#+BEGIN_QUOTE\n${selectedBook.itemCaption}\n#+END_QUOTE\n`;
+                                        } else {
+                                          content = `[楽天サイトへ](${selectedBook.affiliateUrl})\n`;
                                         }
-                                      });
-                                      const blocks = await logseq.Editor.getPageBlocksTree(createPage);
-                                      if (blocks) {
-                                        const firstBlockUUID = blocks[0].uuid;
-                                        setTimeout(async function () {
-                                          await logseq.Editor.editBlock(firstBlockUUID);
-                                          setTimeout(function () {
+                                        await logseq.Editor.prependBlockInPage(createPage.uuid, content);
+                                        await Swal.fire(
+                                          'ページが作成されました。',
+                                          `[[本/${selectedTitle}]]`,
+                                          'success'
+                                        ).then(async (ok) => {
+                                          if (ok) {
+                                            //日付とリンクを先頭行にいれる
+                                            RecodeDateToPage(userConfigs.preferredDateFormat, "Reading", ` [[本/${selectedTitle}]]`);
+                                            logseq.hideMainUI();
+                                          }
+                                        });
+                                      } finally {
+                                        const blocks = await logseq.Editor.getPageBlocksTree(`本/${selectedTitle}`);
+                                        if (blocks) {
+                                          await logseq.Editor.editBlock(blocks[0].uuid);
+                                          await setTimeout(function () {
                                             logseq.Editor.insertAtEditingCursor(",");//ページプロパティを配列として読み込ませる処理
                                           }, 200);
-                                        }, 50);
+                                        }
                                       }
                                     }
                                   }
@@ -266,6 +289,14 @@ const model = {
       });
     }
 
+    async function RecodeDateToPage(userDateFormat, ToPageName, pushPageLink) {
+      const blocks = await logseq.Editor.getPageBlocksTree(ToPageName);
+      if (blocks) {
+        //ページ先頭行の下に追記
+        const content = getDateForPage(new Date(), userDateFormat) + pushPageLink;
+        await logseq.Editor.insertBlock(blocks[0].uuid, content, { sibling: false });
+      }
+    }
 
 
     function convertSalesDate(salesDate: string): string {
