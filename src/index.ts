@@ -6,9 +6,9 @@ const pluginId = PL.id; //set plugin id from package.json
 import Swal from 'sweetalert2';//https://sweetalert2.github.io/
 
 
-//楽天ブックス書籍検索API
-//API詳細  https://webservice.rakuten.co.jp/documentation/books-book-search
-//テストフォーム https://webservice.rakuten.co.jp/explorer/api/BooksTotal/Search
+//楽天ブックス書籍検索API https://webservice.rakuten.co.jp/documentation/books-book-search
+//楽天Kobo電子書籍検索API https://webservice.rakuten.co.jp/documentation/kobo-ebook-search
+//(テストフォーム) https://webservice.rakuten.co.jp/explorer/api/BooksTotal/Search
 
 //参考リンク
 //<dialog>: ダイアログ要素 https://developer.mozilla.org/ja/docs/Web/HTML/Element/dialog
@@ -46,6 +46,10 @@ const model = {
     <dialog id="appDialog">
       <h1>楽天ブックスAPI 書籍検索</h1>
       <main>
+      <select id="selectKobo">
+        <option value="Kobo">電子書籍 (楽天Kobo)</option>
+        <option value="Books">本 (楽天ブックス)</option>
+      </select>
         <form id="searchTitle">
           タイトルで検索
           <input type="text" placeholder="キーワードを入力" required/><input type="submit"/>
@@ -66,7 +70,7 @@ const model = {
     </dialog>
     `;
 
-    const MainUIapp = document.getElementById("app");
+    const MainUIapp = document.getElementById("app") as HTMLDivElement;
     if (MainUIapp) {
       MainUIapp.innerHTML = appHtml;
       openModal();
@@ -74,7 +78,7 @@ const model = {
     }
 
     // 閉じるボタン
-    const closeBtn = document.getElementById('closeBtn');
+    const closeBtn = document.getElementById('closeBtn') as HTMLButtonElement;
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         closeModal();
@@ -115,7 +119,7 @@ const model = {
         </tr>`;
       });
       table += "</tbody></table>";
-      return "<h2>検索結果</h2>\n<p>左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスの商品ページが開きます)</small></p>\n" + table;
+      return "<h2>検索結果</h2>\n<p>左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスもしくは楽天Koboの商品ページが開きます)</small></p>\n" + table;
     }
 
     // 検索フォーム送信時の処理
@@ -132,14 +136,21 @@ const model = {
             if (inputValue.length === 0) {
               return;
             }
+
             const APIelements = "title,author,publisherName,mediumImageUrl,largeImageUrl,salesDate,itemCaption,affiliateUrl";
+            const selectKobo = document.getElementById("selectKobo") as HTMLSelectElement;
             let apiUrl;
+            if (selectKobo && selectKobo.value === "Kobo") {
+              apiUrl = "https://app.rakuten.co.jp/services/api/Kobo/EbookSearch/20170426?";//Kobo
+            } else {
+              apiUrl = "https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?";//Books
+            }
             if (form.id === 'searchTitle') {
-              apiUrl = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&title=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
+              apiUrl += `format=json&title=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
             } else if (form.id === 'searchTitle') {
-              apiUrl = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&isbn=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
+              apiUrl += `format=json&isbn=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
             } else if (form.id === 'searchAuthor') {
-              apiUrl = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&author=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
+              apiUrl += `format=json&author=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
             }
             if (apiUrl) {
               fetch(apiUrl)
@@ -157,8 +168,14 @@ const model = {
                           event.preventDefault();
                           if (event.target instanceof HTMLInputElement) {
                             const selectedTitle = event.target.value;
+                            let FullTitle;
+                            if (selectKobo && selectKobo.value === "Kobo") {
+                              FullTitle = "電子書籍/" + selectedTitle;
+                            } else {
+                              FullTitle = "本/" + selectedTitle;
+                            }
                             closeModal();
-                            const obj = await logseq.Editor.getPage("本/" + selectedTitle) || [];//ページチェック
+                            const obj = await logseq.Editor.getPage(FullTitle) || [];//ページチェック
                             if (Object.keys(obj).length !== 0) {//ページが存在していた場合
                               logseq.hideMainUI();
                               logseq.UI.showMsg("すでにページが存在しています", "warning");
@@ -167,7 +184,7 @@ const model = {
                             } else {//ページが存在していない場合
                               Swal.fire({
                                 title: "続行しますか？",
-                                text: `新しいページを作成します。\n\n[[本/${selectedTitle}]]`,
+                                text: `新しいページを作成します。\n\n[[${FullTitle}]]`,
                                 icon: 'info',
                                 showCancelButton: true,
                                 confirmButtonColor: '#3085d6',
@@ -202,7 +219,7 @@ const model = {
                                     }
                                     itemProperties["tags"] = ["Reading"];
                                     const createPage = await logseq.Editor.createPage(
-                                      `本/${selectedTitle}`,
+                                      FullTitle,
                                       itemProperties,
                                       {
                                         redirect: true,
@@ -219,17 +236,17 @@ const model = {
                                         await logseq.Editor.prependBlockInPage(createPage.uuid, content);
                                         await Swal.fire(
                                           'ページが作成されました。',
-                                          `[[本/${selectedTitle}]]`,
+                                          `[[${FullTitle}]]`,
                                           'success'
                                         ).then(async (ok) => {
                                           if (ok) {
                                             //日付とリンクを先頭行にいれる
-                                            RecodeDateToPage(userConfigs.preferredDateFormat, "Reading", ` [[本/${selectedTitle}]]`);
+                                            RecodeDateToPage(userConfigs.preferredDateFormat, "Reading", ` [[${FullTitle}]]`);
                                             logseq.hideMainUI();
                                           }
                                         });
                                       } finally {
-                                        const blocks = await logseq.Editor.getPageBlocksTree(`本/${selectedTitle}`);
+                                        const blocks = await logseq.Editor.getPageBlocksTree(FullTitle);
                                         if (blocks) {
                                           await logseq.Editor.editBlock(blocks[0].uuid);
                                           await setTimeout(function () {
@@ -253,7 +270,7 @@ const model = {
                       });
                     }
 
-                  }else{
+                  } else {
                     logseq.UI.showMsg("検索結果が見つかりませんでした", "warning");
                   }
                 })
