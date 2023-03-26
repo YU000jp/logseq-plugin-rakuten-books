@@ -64,31 +64,6 @@ const model = {
         <button id="closeBtn">閉じる</button>
       </menu>
     </dialog>
-    <style>
-    table#createTable td.ItemTitle{
-      width:580px;
-    }
-    table#createTable td.ItemImg{
-      width:130px;
-    }
-    table#createTable tr:hover{
-      background:lightyellow;
-    }
-    output#outputFromAPI{
-      margin:1.5em;
-    }
-    dialog#appDialog{
-      outline: 3px double #bf0000;
-      outline-offset: 3px;
-      border-radius: 10px;
-    }
-    dialog#appDialog h1{
-      color: #bf0000;
-    }
-    div#app{
-      background:unset;backdrop-filter:blur(40px);
-    }
-    </style>
     `;
 
     const MainUIapp = document.getElementById("app");
