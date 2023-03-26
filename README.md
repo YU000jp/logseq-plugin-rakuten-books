@@ -4,7 +4,7 @@
 
 > Rakuten books is a site from Japan.
 
-- [楽天ブックス](https://books.rakuten.co.jp/book/?l-id=ebook-header-navi-book)あるいは[楽天Kobo](https://books.rakuten.co.jp/e-book/computer/?l-id=parts-genrenavi-e-book-computer)のデータベースから検索し、Logseqにタイトルページを作成するプラグイン
+- [楽天ブックス](https://books.rakuten.co.jp/book/?l-id=ebook-header-navi-book)あるいは[楽天Kobo](https://books.rakuten.co.jp/e-book/computer/?l-id=parts-genrenavi-e-book-computer)のデータベースを検索し、Logseqにタイトルページを作成するプラグイン
 
 > 手持ちの本で読書メモをとる際に活用できると思います。(利用にあたって楽天アカウントは一切不要です)
 
@@ -57,11 +57,11 @@
 
 ## Other my plugins
 
-- [booklog-jp-import](https://github.com/YU000jp/logseq-plugin-booklog-jp-import)
+- [booklog-jp-import](https://github.com/YU000jp/logseq-plugin-booklog-jp-import) 書籍情報をブクログから一括で取り込むプラグイン
 
-- [panel coloring](https://github.com/YU000jp/logseq-plugin-panel-coloring)
+- [panel coloring](https://github.com/YU000jp/logseq-plugin-panel-coloring) ページの色を変えることができるプラグイン
 
-- [page-tags and hierarchy](https://github.com/YU000jp/logseq-page-tags-and-hierarchy)
+- [page-tags and hierarchy](https://github.com/YU000jp/logseq-page-tags-and-hierarchy) ページタグやHierarchy(ページ名の階層)を右側などに表示するためのプラグイン
 
 ## Credit
 
