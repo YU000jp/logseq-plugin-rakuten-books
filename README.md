@@ -2,6 +2,8 @@
 
 - Utilize Rakuten books API to import book data
 > Rakuten books is a site from Japan.
+ 
+- 楽天ブックスのデータベースから検索し、Logseqにタイトルページを作成するプラグインです。手持ちの本で読書メモをとる際に活用できると思います。
 
 [![latest release version](https://img.shields.io/github/v/release/YU000jp/logseq-plugin-rakuten-books)](https://github.com/YU000jp/logseq-plugin-rakuten-books/releases)
 [![License](https://img.shields.io/github/license/YU000jp/logseq-plugin-rakuten-books?color=blue)](https://github.com/YU000jp/logseq-plugin-rakuten-books/blob/main/LICENSE)
@@ -10,11 +12,9 @@
 
 ![LogseqRakuten](https://user-images.githubusercontent.com/111847207/227758156-1c8e8526-230f-4934-bc97-96ed50066d88.gif)
 
-## マーケットプレースで検索し、`Rakuten books`プラグインをインストールする
-
 ## 使い方
 
-### プラグインのインストール
+### マーケットプレースからインストール
 
 - 右上ツールバーの[---]を押し、[プラグイン]を開く
 
@@ -36,7 +36,9 @@
 
 1. タイトルページに直接書く(日付リンクをつけたほうが、後からいつ書いたのかが分かるので便利です)
 
-## プラグインによって作成されるページ
+## 備考
+
+### プラグインによって作成されるページ
 
 - `Reading`というページに、ページリストがクエリーで表示されます
 
