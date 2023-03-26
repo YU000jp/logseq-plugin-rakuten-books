@@ -12,7 +12,7 @@
 
 ![LogseqRakuten](https://user-images.githubusercontent.com/111847207/227758156-1c8e8526-230f-4934-bc97-96ed50066d88.gif)
 
-## 使い方
+## インストールと使い方
 
 ### マーケットプレースからインストール
 
@@ -21,6 +21,8 @@
 - マーケットプレースを選択する
 
 - 検索欄に`Rakuten`と入力し、検索結果から選び、インストールする
+
+![image](https://user-images.githubusercontent.com/111847207/227759640-d2036290-cb75-476b-a5b5-b47d9f8564c9.png)
 
 ### タイトルページをつくる
 
