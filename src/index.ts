@@ -222,7 +222,7 @@ const model = {
                                     if (selectedBook.largeImageUrl) {
                                       itemProperties["cover"] = selectedBook.largeImageUrl;
                                     }
-                                    if (getDate) {
+                                    if (getDate && getDate !=="[[NaN/aN/aN]]") {
                                       itemProperties["sales"] = getDate;
                                     }
                                     itemProperties["tags"] = ["Reading"];
