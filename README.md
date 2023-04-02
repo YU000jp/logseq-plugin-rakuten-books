@@ -1,4 +1,4 @@
-# logseq-plugin-rakuten-books
+# Logseq Plugin: Rakuten-Books
 
 - Utilize Rakuten books API to import book data
 
