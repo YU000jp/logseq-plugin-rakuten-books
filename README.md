@@ -25,7 +25,7 @@
 
 - 検索欄に`Rakuten`と入力し、検索結果から選び、インストールする
 
-![image](https://user-images.githubusercontent.com/111847207/227759640-d2036290-cb75-476b-a5b5-b47d9f8564c9.png)
+![image](https://user-images.githubusercontent.com/111847207/229358697-3c69ef94-901e-4233-a231-255f57319a47.png)
 
 ### タイトルページをつくる
 
