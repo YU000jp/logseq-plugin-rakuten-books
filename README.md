@@ -57,7 +57,7 @@
 
 ## Other my plugins
 
-- [SomeMenuExtemder](https://github.com/YU000jp/logseq-plugin-some-menu-extender) URLを自動リンクにするなど、いくつかのオプション機能をもつコマンド系プラグイン
+- [SomeMenuExtender](https://github.com/YU000jp/logseq-plugin-some-menu-extender) URLを自動リンクにするなど、いくつかのオプション機能をもつコマンド系プラグイン
 - [Column Layout](https://github.com/YU000jp/Logseq-column-Layout) 右側のスペースに、Linked Referencesとジャーナルクエリーを設置するためのUI系プラグイン
 - [booklog-jp-import](https://github.com/YU000jp/logseq-plugin-booklog-jp-import) 書籍情報をブクログから一括で取り込むプラグイン
 - [panel coloring](https://github.com/YU000jp/logseq-plugin-panel-coloring) 各ページごとに色の指定ができるプラグイン
