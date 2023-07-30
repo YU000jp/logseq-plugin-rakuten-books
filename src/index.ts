@@ -16,7 +16,6 @@ import Swal from 'sweetalert2';//https://sweetalert2.github.io/
 
 /* main */
 const main = () => {
-  console.info(`#${pluginId}: MAIN`); //console
 
   /* user setting */
   // https://logseq.github.io/plugins/types/SettingSchemaDesc.html
@@ -26,14 +25,11 @@ const main = () => {
   // logseq.useSettingsSchema(settingsTemplate);
 
   //open_toolbar
-  logseq.App.registerUIItem("toolbar", {
+  logseq.App.registerUIItem('toolbar', {
     key: pluginId,
-    template: `
-    <div data-on-click="OpenToolbarRakuten" style="font-size:20px;color:#bf0000">R</div>
-    `,
+    template: `<div><a class="button icon" data-on-click="OpenToolbarRakuten" style="font-size: 19px; color: #bf0000; background: #eba9a9; border-radius: 0.4em; ">R</a></div>`,
   });
 
-  console.info(`#${pluginId}: loaded`);//console
 };/* end_main */
 
 
@@ -41,7 +37,6 @@ const main = () => {
 /* on click open_toolbar */
 const model = {
   async OpenToolbarRakuten() {
-    console.info(`#${pluginId}: open_toolbar`);//console
     let appHtml: string = `
     <dialog id="appDialog">
       <h1>楽天ブックスAPI 書籍検索</h1>
@@ -334,8 +329,6 @@ const model = {
 
       return result;
     }
-
-    console.log(`#${pluginId}: open_toolbar end`);//console
   }
 };
 
