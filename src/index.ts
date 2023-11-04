@@ -27,7 +27,7 @@ const main = () => {
   //open_toolbar
   logseq.App.registerUIItem('toolbar', {
     key: pluginId,
-    template: `<div><a class="button icon" data-on-click="OpenToolbarRakuten" style="font-size: 19px; color: #bf0000; background: #eba9a9; border-radius: 0.4em; ">R</a></div>`,
+    template: `<div><a class="button icon" data-on-click="OpenToolbarRakuten" style="font-size: 19px; color: #bf0000; background-color: #eba9a9; border-radius: 0.4em; ">R</a></div>`,
   });
 
 };/* end_main */
@@ -96,7 +96,7 @@ const model = {
     }
 
     function createTable(data) {
-      let table = `<table id="createTable"><thead><tr><th style="background:orange">選択ボタン</th><th>書影カバー</th><th>タイトル</th><th>著者</th><th>出版社</th><th>出版日<small>(推定)</small></th></tr></thead><tbody>`;
+      let table = `<table id="createTable"><thead><tr><th style="background-color:orange">選択ボタン</th><th>書影カバー</th><th>タイトル</th><th>著者</th><th>出版社</th><th>出版日<small>(推定)</small></th></tr></thead><tbody>`;
       data.forEach((item) => {
         let imgTag: string = "";
         if (item.Item.mediumImageUrl) {
