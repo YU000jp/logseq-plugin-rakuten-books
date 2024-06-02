@@ -8,6 +8,7 @@ import { convertSalesDateRakuten } from './rakuten'
 import en from "./translations/en.json"
 import { SettingSchemaDesc } from '@logseq/libs/dist/LSPlugin.user'
 import { createReadingPage } from './lib'
+import { checkAssets } from './toAssets'
 const pluginId = PL.id //set plugin id from package.json
 
 //楽天ブックス書籍検索API https://webservice.rakuten.co.jp/documentation/books-book-search
@@ -27,10 +28,17 @@ const main = async () => {
   })
   /* user setting */
   // https://logseq.github.io/plugins/types/SettingSchemaDesc.html
-  // const settingsTemplate: SettingSchemaDesc[] = [
-
-  // ];
-  // logseq.useSettingsSchema(settingsTemplate);
+  const settingsTemplate: SettingSchemaDesc[] = [
+    // 画像ファイルをアセットに保存するかどうか
+    {
+      key: "saveImage",
+      title: t("有効にする: 画像ファイルをアセットに保存"),
+      type: "boolean",
+      default: true,
+      description: t("APIから取得したカバー画像をアセットに保存します。"),
+    },
+  ]
+  logseq.useSettingsSchema(settingsTemplate)
 
   //open_toolbar
   logseq.App.registerUIItem('toolbar', {
@@ -219,8 +227,13 @@ const createBookPage = (FullTitle: string, data: any, selectedTitle: string, ope
           itemProperties["author"] = selectedBook.author
         if (selectedBook.publisherName)
           itemProperties["publisher"] = selectedBook.publisherName
-        if (selectedBook.largeImageUrl)
-          itemProperties["cover"] = selectedBook.largeImageUrl
+        if (selectedBook.largeImageUrl) {
+          if (logseq.settings!.saveImage === true)
+            await checkAssets(selectedBook.largeImageUrl, itemProperties)//画像をアセットに保存する場合
+          else
+            itemProperties["cover"] = selectedBook.largeImageUrl //画像をアセットに保存しない場合
+        }
+
         if (getDate
           && getDate !== "[[NaN/aN/aN]]"
           && getDate !== "NaN/aN/aN")
