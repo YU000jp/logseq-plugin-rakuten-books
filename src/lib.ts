@@ -47,3 +47,12 @@ export const RecodeDateToPage = async (
       (getDateForPage(new Date(), userDateFormat) + pushPageLink),
       { sibling: false })
 }
+export const createReadingPage = async () => {
+  const MainPageObj = await logseq.Editor.getPage("Reading") || [] //ページチェック
+  if (Object.keys(MainPageObj).length === 0) {
+    //ページが存在しない場合
+    const createMainPage = await logseq.Editor.createPage("Reading", {}, { redirect: false, createFirstBlock: true })
+    if (createMainPage)
+      await logseq.Editor.prependBlockInPage(createMainPage.uuid, "{{query (page-tags Reading)}}")
+  }
+}

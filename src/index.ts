@@ -1,11 +1,13 @@
-import '@logseq/libs'; //https://plugins-doc.logseq.com/
-import { getDateForPage } from 'logseq-dateutils'; //https://github.com/hkgnp/logseq-dateutils
-import { setup as l10nSetup, t } from "logseq-l10n"; //https://github.com/sethyuan/logseq-l10n
-import Swal from 'sweetalert2'; //https://sweetalert2.github.io/
+import '@logseq/libs' //https://plugins-doc.logseq.com/
+import { getDateForPage } from 'logseq-dateutils' //https://github.com/hkgnp/logseq-dateutils
+import { setup as l10nSetup, t } from "logseq-l10n" //https://github.com/sethyuan/logseq-l10n
+import Swal from 'sweetalert2' //https://sweetalert2.github.io/
 import { logseq as PL } from "../package.json"
 import { closeModal, openModal, RecodeDateToPage, setCloseButton, setMainUIapp } from './lib'
 import { convertSalesDateRakuten } from './rakuten'
 import en from "./translations/en.json"
+import { SettingSchemaDesc } from '@logseq/libs/dist/LSPlugin.user'
+import { createReadingPage } from './lib'
 const pluginId = PL.id //set plugin id from package.json
 
 //楽天ブックス書籍検索API https://webservice.rakuten.co.jp/documentation/books-book-search
@@ -162,7 +164,7 @@ const formSubmitEvent = (form: HTMLFormElement) => {
           const radioButtons = document.querySelectorAll('input[name="selected"]')
           if (radioButtons)
             for (const radio of radioButtons)
-              choiceCreate(radio, selectKobo, closeModal, openModal, data)
+              choiceRadioButton(radio, selectKobo, closeModal, openModal, data)
         } else
           logseq.UI.showMsg(t("検索結果が見つかりませんでした"), "warning")
       })
@@ -172,8 +174,10 @@ const formSubmitEvent = (form: HTMLFormElement) => {
   })
 }
 
-const choiceCreate = (radio: Element, selectKobo: HTMLSelectElement, closeModal: () => void, openModal: () => void, data: any) => {
+
+const choiceRadioButton = (radio: Element, selectKobo: HTMLSelectElement, closeModal: () => void, openModal: () => void, data: any) => {
   radio.addEventListener('change', async (event) => {
+
     event.preventDefault()
     if (!(event.target instanceof HTMLInputElement)) return
     const selectedTitle = event.target.value
@@ -183,99 +187,101 @@ const choiceCreate = (radio: Element, selectKobo: HTMLSelectElement, closeModal:
       : t("本") + "/" + selectedTitle
 
     closeModal()
-    const obj = await logseq.Editor.getPage(FullTitle) || [] //ページチェック
-    if (Object.keys(obj).length !== 0) {
-      //ページが存在していた場合
-      logseq.hideMainUI()
-      logseq.UI.showMsg(t("すでにページが存在しています"), "warning")
-      openModal()
-      logseq.showMainUI()
-    } else {
-      //ページが存在していない場合
-      Swal.fire({
-        title: t("続行しますか？"),
-        text: `${t("新しいページを作成します。")}\n\n[[${FullTitle}]]`,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          //"Reading"ページの作成
-          const MainPageObj = await logseq.Editor.getPage("Reading") || [] //ページチェック
-          if (Object.keys(MainPageObj).length === 0) {
-            //ページが存在しない場合
-            const createMainPage = await logseq.Editor.createPage("Reading", {}, { redirect: false, createFirstBlock: true })
-            if (createMainPage)
-              await logseq.Editor.prependBlockInPage(createMainPage.uuid, "{{query (page-tags Reading)}}")
-          }
-          //ページを追加する処理
-          const selectedBook = data.Items.find((item) => item.Item.title === selectedTitle)?.Item // 選択された書籍の情報を取得
-          if (selectedBook) {
-            const { preferredDateFormat } = await logseq.App.getUserConfigs() as { preferredDateFormat: string }
-            const getDate = getDateForPage(new Date(selectedBook.salesDate), preferredDateFormat)
 
-            let itemProperties = {}
-            if (selectedBook.author)
-              itemProperties["author"] = selectedBook.author
-            if (selectedBook.publisherName)
-              itemProperties["publisher"] = selectedBook.publisherName
-            if (selectedBook.largeImageUrl)
-              itemProperties["cover"] = selectedBook.largeImageUrl
-            if (getDate
-              && getDate !== "[[NaN/aN/aN]]"
-              && getDate !== "NaN/aN/aN")
-              itemProperties["sales"] = getDate
+    if (Object.keys(await logseq.Editor.getPage(FullTitle) || []).length !== 0) //ページチェック
+      createBookPageCancel(openModal) //ページが存在していた場合
+    else
+      createBookPage(FullTitle, data, selectedTitle, openModal) //ページが存在していない場合
+  })
+}
 
-            itemProperties["tags"] = ["Reading"]
-            const createPage = await logseq.Editor.createPage(
-              FullTitle,
-              itemProperties,
-              {
-                redirect: true,
-                createFirstBlock: true
-              })
-            if (createPage) {
-              try {
-                await logseq.Editor.prependBlockInPage(createPage.uuid,
-                  (selectedBook.itemCaption) ?
-                    `
+
+const createBookPage = (FullTitle: string, data: any, selectedTitle: string, openModal: () => void) => {
+  Swal.fire({
+    title: t("続行しますか？"),
+    text: `${t("新しいページを作成します。")}\n\n[[${FullTitle}]]`,
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      //"Reading"ページの作成
+      await createReadingPage()
+      //ページを追加する処理
+      const selectedBook = data.Items.find((item) => item.Item.title === selectedTitle)?.Item // 選択された書籍の情報を取得
+      if (selectedBook) {
+        const { preferredDateFormat } = await logseq.App.getUserConfigs() as { preferredDateFormat: string }
+        const getDate = getDateForPage(new Date(selectedBook.salesDate), preferredDateFormat)
+
+        let itemProperties = {}
+        if (selectedBook.author)
+          itemProperties["author"] = selectedBook.author
+        if (selectedBook.publisherName)
+          itemProperties["publisher"] = selectedBook.publisherName
+        if (selectedBook.largeImageUrl)
+          itemProperties["cover"] = selectedBook.largeImageUrl
+        if (getDate
+          && getDate !== "[[NaN/aN/aN]]"
+          && getDate !== "NaN/aN/aN")
+          itemProperties["sales"] = getDate
+
+        itemProperties["tags"] = ["Reading"]
+        const createPage = await logseq.Editor.createPage(
+          FullTitle,
+          itemProperties,
+          {
+            redirect: true,
+            createFirstBlock: true
+          })
+        if (createPage) {
+          try {
+            await logseq.Editor.prependBlockInPage(createPage.uuid,
+              (selectedBook.itemCaption) ?
+                `
 (${t("内容紹介「BOOK」データベースより")}) | [${t("楽天サイトへ")}](${selectedBook.affiliateUrl})
 #+BEGIN_QUOTE\n${selectedBook.itemCaption}
 #+END_QUOTE
                     `
-                    : `
+                : `
 [${t("楽天サイトへ")}](${selectedBook.affiliateUrl})
 `
-                )
-                await Swal.fire(t("ページが作成されました。"), `[[${FullTitle}]]`, 'success').then(async (ok) => {
-                  if (ok) {
-                    //日付とリンクを先頭行にいれる
-                    RecodeDateToPage(preferredDateFormat, "Reading", ` [[${FullTitle}]]`)
-                    logseq.hideMainUI()
-                  }
-                })
-              } finally {
-                const blocks = await logseq.Editor.getPageBlocksTree(FullTitle)
-                if (blocks) {
-                  await logseq.Editor.editBlock(blocks[0].uuid)
-                  setTimeout(function () {
-                    logseq.Editor.insertAtEditingCursor(",") //ページプロパティを配列として読み込ませる処理
-                  }, 200)
-                }
+            )
+            await Swal.fire(t("ページが作成されました。"), `[[${FullTitle}]]`, 'success').then(async (ok) => {
+              if (ok) {
+                //日付とリンクを先頭行にいれる
+                RecodeDateToPage(preferredDateFormat, "Reading", ` [[${FullTitle}]]`)
+                logseq.hideMainUI()
               }
+            })
+          } finally {
+            const blocks = await logseq.Editor.getPageBlocksTree(FullTitle)
+            if (blocks) {
+              await logseq.Editor.editBlock(blocks[0].uuid)
+              setTimeout(function () {
+                logseq.Editor.insertAtEditingCursor(",") //ページプロパティを配列として読み込ませる処理
+              }, 200)
             }
           }
-        } else {
-          //作成キャンセルボタン
-          logseq.hideMainUI()
-          await logseq.UI.showMsg(t("キャンセルしました"), "warning")
-          openModal()
-          logseq.showMainUI()
         }
-      })
-    }
+      }
+    } else
+      await userCancel(openModal) //作成キャンセルボタン
   })
+}
+
+const createBookPageCancel = (openModal: () => void) => {
+  logseq.hideMainUI()
+  logseq.UI.showMsg(t("すでにページが存在しています"), "warning")
+  openModal()
+  logseq.showMainUI()
+}
+
+const userCancel = async (openModal: () => void) => {
+  logseq.hideMainUI()
+  await logseq.UI.showMsg(t("キャンセルしました"), "warning")
+  openModal()
+  logseq.showMainUI()
 }
 
 logseq.ready(model, main).catch(console.error)
