@@ -1,9 +1,9 @@
-import '@logseq/libs'; //https://plugins-doc.logseq.com/
-import { getDateForPage } from 'logseq-dateutils';//https://github.com/hkgnp/logseq-dateutils
-import { logseq as PL } from "../package.json";
-const pluginId = PL.id; //set plugin id from package.json
-//import { SettingSchemaDesc } from "@logseq/libs/dist/LSPlugin.user";
-import Swal from 'sweetalert2';//https://sweetalert2.github.io/
+import '@logseq/libs' //https://plugins-doc.logseq.com/
+import { getDateForPage } from 'logseq-dateutils'//https://github.com/hkgnp/logseq-dateutils
+import { logseq as PL } from "../package.json"
+const pluginId = PL.id //set plugin id from package.json
+import Swal from 'sweetalert2'//https://sweetalert2.github.io/
+import { convertSalesDate } from './lib'
 
 
 //楽天ブックス書籍検索API https://webservice.rakuten.co.jp/documentation/books-book-search
@@ -28,9 +28,9 @@ const main = () => {
   logseq.App.registerUIItem('toolbar', {
     key: pluginId,
     template: `<div><a class="button icon" data-on-click="OpenToolbarRakuten" style="font-size: 19px; color: #bf0000; background-color: #eba9a9; border-radius: 0.4em; ">R</a></div>`,
-  });
+  })
 
-};/* end_main */
+}/* end_main */
 
 
 
@@ -63,47 +63,47 @@ const model = {
         <button id="closeBtn">閉じる</button>
       </menu>
     </dialog>
-    `;
+    `
 
-    const MainUIapp = document.getElementById("app") as HTMLDivElement;
+    const MainUIapp = document.getElementById("app") as HTMLDivElement
     if (MainUIapp) {
-      MainUIapp.innerHTML = appHtml;
-      openModal();
-      logseq.showMainUI();
+      MainUIapp.innerHTML = appHtml
+      openModal()
+      logseq.showMainUI()
     }
 
     // 閉じるボタン
-    const closeBtn = document.getElementById('closeBtn') as HTMLButtonElement;
+    const closeBtn = document.getElementById('closeBtn') as HTMLButtonElement
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
-        closeModal();
-        logseq.hideMainUI();
-      });
+        closeModal()
+        logseq.hideMainUI()
+      })
     }
 
     function closeModal() {
-      const appDialog = document.getElementById('appDialog') as HTMLDialogElement;
+      const appDialog = document.getElementById('appDialog') as HTMLDialogElement
       if (appDialog) {
-        appDialog.close();
+        appDialog.close()
       }
     }
 
     function openModal() {
-      const appDialog = document.getElementById('appDialog') as HTMLDialogElement;
+      const appDialog = document.getElementById('appDialog') as HTMLDialogElement
       if (appDialog) {
-        appDialog.showModal();
+        appDialog.showModal()
       }
     }
 
     function createTable(data) {
-      let table = `<table id="createTable"><thead><tr><th style="background-color:orange">選択ボタン</th><th>書影カバー</th><th>タイトル</th><th>著者</th><th>出版社</th><th>出版日<small>(推定)</small></th></tr></thead><tbody>`;
+      let table = `<table id="createTable"><thead><tr><th style="background-color:orange">選択ボタン</th><th>書影カバー</th><th>タイトル</th><th>著者</th><th>出版社</th><th>出版日<small>(推定)</small></th></tr></thead><tbody>`
       data.forEach((item) => {
-        let imgTag: string = "";
+        let imgTag: string = ""
         if (item.Item.mediumImageUrl) {
-          imgTag = `<img src="${item.Item.mediumImageUrl}"/>`;
+          imgTag = `<img src="${item.Item.mediumImageUrl}"/>`
         }
-        const truncatedTitle = item.Item.title.slice(0, 60);
-        item.Item.salesDate = convertSalesDate(item.Item.salesDate);
+        const truncatedTitle = item.Item.title.slice(0, 60)
+        item.Item.salesDate = convertSalesDate(item.Item.salesDate)
         table += `<tr>
           <td><input type="radio" name="selected" value="${item.Item.title}"></td>
           <td class="ItemImg">${imgTag}</td>
@@ -111,71 +111,77 @@ const model = {
           <td>${item.Item.author}</td>
           <td>${item.Item.publisherName}</td>
           <td>${item.Item.salesDate}</td>
-        </tr>`;
-      });
-      table += "</tbody></table>";
-      return "<h2>検索結果</h2>\n<p>左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスもしくは楽天Koboの商品ページが開きます)</small></p>\n" + table;
+        </tr>`
+      })
+      table += "</tbody></table>"
+      return "<h2>検索結果</h2>\n<p>左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスもしくは楽天Koboの商品ページが開きます)</small></p>\n" + table
     }
 
     // 検索フォーム送信時の処理
-    const apiKey = "1032240167590752216";
-    const affiliateId = "30c0276b.32e8a4ed.30c0276c.b21dc4e8";
-    const searchForms = document.querySelectorAll('form');
+    const apiKey = "1032240167590752216"
+    const affiliateId = "30c0276b.32e8a4ed.30c0276c.b21dc4e8"
+    const searchForms = document.querySelectorAll('form')
     if (searchForms) {
       searchForms.forEach((form) => {
         form.addEventListener('submit', (event) => {
-          event.preventDefault();
-          const input = form.querySelector('input[type="text"]');
+          event.preventDefault()
+          const input = form.querySelector('input[type="text"]')
           if (input instanceof HTMLInputElement) {
-            const inputValue = input.value.trim();
-            if (inputValue.length === 0) {
-              return;
+            const inputValue = input.value.trim()
+            if (inputValue.length === 0) return
+
+            const APIelements = "title,author,publisherName,mediumImageUrl,largeImageUrl,salesDate,itemCaption,affiliateUrl"
+            const selectKobo = document.getElementById("selectKobo") as HTMLSelectElement
+
+            let apiUrl = (selectKobo
+              && selectKobo.value === "Kobo") ?
+              "https://app.rakuten.co.jp/services/api/Kobo/EbookSearch/20170426?"//Kobo
+              : "https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?"//Books
+
+            switch (form.id) {
+              case 'searchTitle':
+                apiUrl += `format=json&title=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`
+                break
+              case 'searchISBN':
+                apiUrl += `format=json&isbn=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`
+                break
+              case 'searchAuthor':
+                apiUrl += `format=json&author=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`
+                break
+              default:
+                break
             }
 
-            const APIelements = "title,author,publisherName,mediumImageUrl,largeImageUrl,salesDate,itemCaption,affiliateUrl";
-            const selectKobo = document.getElementById("selectKobo") as HTMLSelectElement;
-            let apiUrl;
-            if (selectKobo && selectKobo.value === "Kobo") {
-              apiUrl = "https://app.rakuten.co.jp/services/api/Kobo/EbookSearch/20170426?";//Kobo
-            } else {
-              apiUrl = "https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?";//Books
-            }
-            if (form.id === 'searchTitle') {
-              apiUrl += `format=json&title=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
-            } else if (form.id === 'searchTitle') {
-              apiUrl += `format=json&isbn=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
-            } else if (form.id === 'searchAuthor') {
-              apiUrl += `format=json&author=${inputValue}&applicationId=${apiKey}&affiliateId=${affiliateId}&elements=${APIelements}`;
-            }
             if (apiUrl) {
               fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
-                  const output = document.getElementById('outputFromAPI');
-                  if (output && data.Items) {
+                  const output = document.getElementById('outputFromAPI')
+                  if (output
+                    && data.Items) {
                     const Table = createTable(data.Items)
-                    output.innerHTML = Table;
+                    output.innerHTML = Table
+
                     // ラジオボタンが選択された場合の処理
-                    const radioButtons = document.querySelectorAll('input[name="selected"]');
+                    const radioButtons = document.querySelectorAll('input[name="selected"]')
                     if (radioButtons) {
                       radioButtons.forEach((radio) => {
                         radio.addEventListener('change', async (event) => {
-                          event.preventDefault();
+                          event.preventDefault()
                           if (event.target instanceof HTMLInputElement) {
-                            const selectedTitle = event.target.value;
-                            let FullTitle;
-                            if (selectKobo && selectKobo.value === "Kobo") {
-                              FullTitle = "電子書籍/" + selectedTitle;
-                            } else {
-                              FullTitle = "本/" + selectedTitle;
-                            }
-                            closeModal();
-                            const obj = await logseq.Editor.getPage(FullTitle) || [];//ページチェック
+                            const selectedTitle = event.target.value
+                            const FullTitle = (selectKobo
+                              && selectKobo.value === "Kobo") ?
+                              "電子書籍/" + selectedTitle
+                              : "本/" + selectedTitle
+
+                            closeModal()
+                            const obj = await logseq.Editor.getPage(FullTitle) || []//ページチェック
                             if (Object.keys(obj).length !== 0) {//ページが存在していた場合
-                              logseq.hideMainUI();
-                              logseq.UI.showMsg("すでにページが存在しています", "warning");
-                              openModal();
-                              logseq.showMainUI();
+                              logseq.hideMainUI()
+                              logseq.UI.showMsg("すでにページが存在しています", "warning")
+                              openModal()
+                              logseq.showMainUI()
                             } else {//ページが存在していない場合
                               Swal.fire({
                                 title: "続行しますか？",
@@ -187,48 +193,48 @@ const model = {
                               }).then(async (result) => {
                                 if (result.isConfirmed) {//true
                                   //"Reading"ページの作成
-                                  const MainPageObj = await logseq.Editor.getPage("Reading") || [];//ページチェック
+                                  const MainPageObj = await logseq.Editor.getPage("Reading") || []//ページチェック
                                   if (Object.keys(MainPageObj).length === 0) {//ページが存在しない場合
-                                    const createMainPage = await logseq.Editor.createPage("Reading", {}, { redirect: false, createFirstBlock: true });
-                                    if (createMainPage) {
-                                      await logseq.Editor.prependBlockInPage(createMainPage.uuid, "{{query (page-tags Reading)}}");
-                                    }
+                                    const createMainPage = await logseq.Editor.createPage("Reading", {}, { redirect: false, createFirstBlock: true })
+                                    if (createMainPage)
+                                      await logseq.Editor.prependBlockInPage(createMainPage.uuid, "{{query (page-tags Reading)}}")
                                   }
                                   //ページを追加する処理
-                                  const selectedBook = data.Items.find((item) => item.Item.title === selectedTitle)?.Item;// 選択された書籍の情報を取得
+                                  const selectedBook = data.Items.find((item) => item.Item.title === selectedTitle)?.Item// 選択された書籍の情報を取得
                                   if (selectedBook) {
-                                    const userConfigs = await logseq.App.getUserConfigs();
-                                    const getDate = await getDateForPage(new Date(selectedBook.salesDate), userConfigs.preferredDateFormat);
-                                    let itemProperties = {};
-                                    if (selectedBook.author) {
-                                      itemProperties["author"] = selectedBook.author;
-                                    }
-                                    if (selectedBook.publisherName) {
-                                      itemProperties["publisher"] = selectedBook.publisherName;
-                                    }
-                                    if (selectedBook.largeImageUrl) {
-                                      itemProperties["cover"] = selectedBook.largeImageUrl;
-                                    }
-                                    if (getDate && getDate !== "[[NaN/aN/aN]]" && getDate !== "NaN/aN/aN") {
-                                      itemProperties["sales"] = getDate;
-                                    }
-                                    itemProperties["tags"] = ["Reading"];
+                                    const { preferredDateFormat } = await logseq.App.getUserConfigs() as { preferredDateFormat: string }
+                                    const getDate = await getDateForPage(new Date(selectedBook.salesDate), preferredDateFormat)
+
+                                    let itemProperties = {}
+                                    if (selectedBook.author)
+                                      itemProperties["author"] = selectedBook.author
+
+                                    if (selectedBook.publisherName)
+                                      itemProperties["publisher"] = selectedBook.publisherName
+
+                                    if (selectedBook.largeImageUrl)
+                                      itemProperties["cover"] = selectedBook.largeImageUrl
+
+                                    if (getDate
+                                      && getDate !== "[[NaN/aN/aN]]"
+                                      && getDate !== "NaN/aN/aN")
+                                      itemProperties["sales"] = getDate
+
+                                    itemProperties["tags"] = ["Reading"]
                                     const createPage = await logseq.Editor.createPage(
                                       FullTitle,
                                       itemProperties,
                                       {
                                         redirect: true,
                                         createFirstBlock: true,
-                                      });
+                                      })
                                     if (createPage) {
                                       try {
-                                        let content;
-                                        if (selectedBook.itemCaption) {
-                                          content = `(内容紹介「BOOK」データベースより) | [楽天サイトへ](${selectedBook.affiliateUrl})\n#+BEGIN_QUOTE\n${selectedBook.itemCaption}\n#+END_QUOTE\n`;
-                                        } else {
-                                          content = `[楽天サイトへ](${selectedBook.affiliateUrl})\n`;
-                                        }
-                                        await logseq.Editor.prependBlockInPage(createPage.uuid, content);
+                                        await logseq.Editor.prependBlockInPage(createPage.uuid,
+                                          (selectedBook.itemCaption) ?
+                                            `(内容紹介「BOOK」データベースより) | [楽天サイトへ](${selectedBook.affiliateUrl})\n#+BEGIN_QUOTE\n${selectedBook.itemCaption}\n#+END_QUOTE\n`
+                                            : `[楽天サイトへ](${selectedBook.affiliateUrl})\n`
+                                        )
                                         await Swal.fire(
                                           'ページが作成されました。',
                                           `[[${FullTitle}]]`,
@@ -236,100 +242,61 @@ const model = {
                                         ).then(async (ok) => {
                                           if (ok) {
                                             //日付とリンクを先頭行にいれる
-                                            RecodeDateToPage(userConfigs.preferredDateFormat, "Reading", ` [[${FullTitle}]]`);
-                                            logseq.hideMainUI();
+                                            RecodeDateToPage(preferredDateFormat, "Reading", ` [[${FullTitle}]]`)
+                                            logseq.hideMainUI()
                                           }
-                                        });
+                                        })
                                       } finally {
-                                        const blocks = await logseq.Editor.getPageBlocksTree(FullTitle);
+                                        const blocks = await logseq.Editor.getPageBlocksTree(FullTitle)
                                         if (blocks) {
-                                          await logseq.Editor.editBlock(blocks[0].uuid);
-                                          await setTimeout(function () {
-                                            logseq.Editor.insertAtEditingCursor(",");//ページプロパティを配列として読み込ませる処理
-                                          }, 200);
+                                          await logseq.Editor.editBlock(blocks[0].uuid)
+                                          setTimeout(function () {
+                                            logseq.Editor.insertAtEditingCursor(",")//ページプロパティを配列として読み込ませる処理
+                                          }, 200)
                                         }
                                       }
                                     }
                                   }
 
                                 } else {//作成キャンセルボタン
-                                  logseq.hideMainUI();
-                                  await logseq.UI.showMsg("キャンセルしました", "warning");
-                                  openModal();
-                                  logseq.showMainUI();
+                                  logseq.hideMainUI()
+                                  await logseq.UI.showMsg("キャンセルしました", "warning")
+                                  openModal()
+                                  logseq.showMainUI()
                                 }
-                              });
+                              })
                             }
                           }
-                        });
-                      });
+                        })
+                      })
                     }
 
-                  } else {
-                    logseq.UI.showMsg("検索結果が見つかりませんでした", "warning");
-                  }
+                  } else
+                    logseq.UI.showMsg("検索結果が見つかりませんでした", "warning")
                 })
                 .catch((error) => {
-                  console.error(error);
-                });
+                  console.error(error)
+                })
             }
           }
-        });
-      });
-    }
-
-    async function RecodeDateToPage(userDateFormat, ToPageName, pushPageLink) {
-      const blocks = await logseq.Editor.getPageBlocksTree(ToPageName);
-      if (blocks) {
-        //ページ先頭行の下に追記
-        const content = getDateForPage(new Date(), userDateFormat) + pushPageLink;
-        await logseq.Editor.insertBlock(blocks[0].uuid, content, { sibling: false });
-      }
+        })
+      })
     }
 
 
-    function convertSalesDate(salesDate: string): string {
-      // 日付の正規表現を定義します。
-      const regex = /(\d{4})年(\d{1,2})月(\d{1,2})日?/;
 
-      // 上旬/中旬/下旬や頃、以降などの表現をYYYY/MM/DDに変換するための対応表を作成します。
-      const approximateDates: { [key: string]: string } = {
-        "上旬": "01",
-        "中旬": "15",
-        "下旬": "21",
-        "頃": "",
-        "以降": ""
-      };
 
-      // 正規表現で発売日から年月日を抜き出します。
-      const match = salesDate.match(regex);
 
-      // DDが得られない場合は、毎月1日として扱います。
-      let year = "";
-      let month = "";
-      let day = "";
-      if (match) {
-        year = match[1];
-        month = match[2];
-        day = match[3] || "01";
-      } else {
-        year = "";
-        month = "";
-        day = "01";
-      }
-
-      // 発売日が未確定の場合は、空の値にします。
-      let result = "";
-      if (!match) {
-        result = "";
-      } else {
-        // YYYY/MM/DD形式に変換します。
-        result = `${year}/${month.padStart(2, "0")}/${day.padStart(2, "0")}`;
-      }
-
-      return result;
-    }
   }
-};
+}
 
-logseq.ready(model, main).catch(console.error);
+const RecodeDateToPage = async (userDateFormat, ToPageName, pushPageLink) => {
+  const blocks = await logseq.Editor.getPageBlocksTree(ToPageName)
+  if (blocks) {
+    //ページ先頭行の下に追記
+    const content = getDateForPage(new Date(), userDateFormat) + pushPageLink
+    await logseq.Editor.insertBlock(blocks[0].uuid, content, { sibling: false })
+  }
+}
+
+logseq.ready(model, main).catch(console.error)
