@@ -4,6 +4,7 @@ import { setup as l10nSetup, t } from "logseq-l10n"; //https://github.com/sethyu
 import Swal from 'sweetalert2'; //https://sweetalert2.github.io/
 import { logseq as PL } from "../package.json"
 import { closeModal, openModal, RecodeDateToPage, setCloseButton, setMainUIapp } from './lib'
+import { convertSalesDateRakuten } from './rakuten'
 import en from "./translations/en.json"
 const pluginId = PL.id //set plugin id from package.json
 
