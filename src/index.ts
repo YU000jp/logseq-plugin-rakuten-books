@@ -55,7 +55,7 @@ const model = {
       </form>
         <form id="searchISBN">
           ISBNで検索
-          <input type="text" pattern="\d{10}|\d{13}" maxlength="13" placeholder="10桁もしくは13桁" required/><input type="submit"/>
+          <input type="text" maxlength="13" placeholder="10桁もしくは13桁" required/><input type="submit"/>
         </form>
       <output aria-live="polite" id="outputFromAPI"></output>
       </main>
