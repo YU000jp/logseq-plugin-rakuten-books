@@ -1,10 +1,11 @@
 import '@logseq/libs'; //https://plugins-doc.logseq.com/
 import { getDateForPage } from 'logseq-dateutils'; //https://github.com/hkgnp/logseq-dateutils
+import { setup as l10nSetup, t } from "logseq-l10n"; //https://github.com/sethyuan/logseq-l10n
 import Swal from 'sweetalert2'; //https://sweetalert2.github.io/
 import { logseq as PL } from "../package.json"
-import { closeModal, convertSalesDateRakuten, openModal, RecodeDateToPage, setCloseButton, setMainUIapp } from './lib'
+import { closeModal, openModal, RecodeDateToPage, setCloseButton, setMainUIapp } from './lib'
+import en from "./translations/en.json"
 const pluginId = PL.id //set plugin id from package.json
-
 
 //楽天ブックス書籍検索API https://webservice.rakuten.co.jp/documentation/books-book-search
 //楽天Kobo電子書籍検索API https://webservice.rakuten.co.jp/documentation/kobo-ebook-search
@@ -15,8 +16,12 @@ const pluginId = PL.id //set plugin id from package.json
 
 
 /* main */
-const main = () => {
-
+const main = async () => {
+  // i18n
+  await l10nSetup({
+    defaultLocale: "ja",
+    builtinTranslations: { en }
+  })
   /* user setting */
   // https://logseq.github.io/plugins/types/SettingSchemaDesc.html
   // const settingsTemplate: SettingSchemaDesc[] = [
@@ -38,28 +43,28 @@ const model = {
   async OpenToolbarRakuten() {
     let appHtml: string = `
     <dialog id="appDialog">
-      <h1>楽天ブックスAPI 書籍検索</h1>
+      <h1>${t("楽天ブックスAPI 書籍検索")}</h1>
       <main>
       <select id="selectKobo">
-        <option value="Kobo">電子書籍 (楽天Kobo)</option>
-        <option value="Books">本 (楽天ブックス)</option>
+        <option value="Kobo">${t("電子書籍 (楽天Kobo)")}</option>
+        <option value="Books"${t(">本 (楽天ブックス)")}</option>
       </select>
         <form id="searchTitle">
-          タイトルで検索
-          <input type="text" placeholder="キーワードを入力" required/><input type="submit"/>
+          ${t("タイトルで検索")}
+          <input type="text" placeholder="${t("キーワードを入力")}" required/><input type="submit"/>
         </form>
         <form id="searchAuthor">
-        著者名で検索
-        <input type="text" placeholder="キーワードを入力" required/><input type="submit"/>
+        ${t("著者で検索")}
+        <input type="text" placeholder="${t("キーワードを入力")}" required/><input type="submit"/>
       </form>
         <form id="searchISBN">
-          ISBNで検索
-          <input type="text" maxlength="13" placeholder="10桁もしくは13桁" required/><input type="submit"/>
+          ${t("ISBNで検索")}
+          <input type="text" maxlength="13" placeholder="${t("10桁もしくは13桁")}" required/><input type="submit"/>
         </form>
       <output aria-live="polite" id="outputFromAPI"></output>
       </main>
       <menu>
-        <button id="closeBtn">閉じる</button>
+        <button id="closeBtn">${t("閉じる")}</button>
       </menu>
     </dialog>
     `
@@ -96,11 +101,11 @@ const createTable = (data) => {
     </tr>`
   }
   return (`
-<h2>検索結果</h2>
-<p>左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスもしくは楽天Koboの商品ページが開きます)</small></p>
+<h2>${t("検索結果")}</h2>
+<p>${t("左側の〇をクリックすると、Logseqにページが作成されます。<small>(タイトルをクリックすると、楽天ブックスもしくは楽天Koboの商品ページが開きます)</small>")}</p>
 <table id="createTable">
 <thead>
-<tr><th style="background-color:orange">選択ボタン</th><th>書影カバー</th><th>タイトル</th><th>著者</th><th>出版社</th><th>出版日<small>(推定)</small></th></tr>
+<tr><th style="background-color:orange">${t("選択ボタン")}</th><th>${t("書影カバー")}</th><th>${t("タイトル")}</th><th>${t("著者")}</th><th>${t("出版社")}</th><th>${t("出版日")}<small>${t("(推定)")}</small></th></tr>
 </thead>
 <tbody>
 `+ tableInner + "</tbody></table>\n")
@@ -158,7 +163,7 @@ const formSubmitEvent = (form: HTMLFormElement) => {
             for (const radio of radioButtons)
               choiceCreate(radio, selectKobo, closeModal, openModal, data)
         } else
-          logseq.UI.showMsg("検索結果が見つかりませんでした", "warning")
+          logseq.UI.showMsg(t("検索結果が見つかりませんでした"), "warning")
       })
       .catch((error) => {
         console.error(error)
@@ -173,22 +178,22 @@ const choiceCreate = (radio: Element, selectKobo: HTMLSelectElement, closeModal:
     const selectedTitle = event.target.value
     const FullTitle = (selectKobo
       && selectKobo.value === "Kobo") ?
-      "電子書籍/" + selectedTitle
-      : "本/" + selectedTitle
+      t("電子書籍") + "/" + selectedTitle
+      : t("本") + "/" + selectedTitle
 
     closeModal()
     const obj = await logseq.Editor.getPage(FullTitle) || [] //ページチェック
     if (Object.keys(obj).length !== 0) {
       //ページが存在していた場合
       logseq.hideMainUI()
-      logseq.UI.showMsg("すでにページが存在しています", "warning")
+      logseq.UI.showMsg(t("すでにページが存在しています"), "warning")
       openModal()
       logseq.showMainUI()
     } else {
       //ページが存在していない場合
       Swal.fire({
-        title: "続行しますか？",
-        text: `新しいページを作成します。\n\n[[${FullTitle}]]`,
+        title: t("続行しますか？"),
+        text: `${t("新しいページを作成します。")}\n\n[[${FullTitle}]]`,
         icon: 'info',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -234,15 +239,15 @@ const choiceCreate = (radio: Element, selectKobo: HTMLSelectElement, closeModal:
                 await logseq.Editor.prependBlockInPage(createPage.uuid,
                   (selectedBook.itemCaption) ?
                     `
-(内容紹介「BOOK」データベースより) | [楽天サイトへ](${selectedBook.affiliateUrl})
+(${t("内容紹介「BOOK」データベースより")}) | [${t("楽天サイトへ")}](${selectedBook.affiliateUrl})
 #+BEGIN_QUOTE\n${selectedBook.itemCaption}
 #+END_QUOTE
                     `
                     : `
-[楽天サイトへ](${selectedBook.affiliateUrl})
+[${t("楽天サイトへ")}](${selectedBook.affiliateUrl})
 `
                 )
-                await Swal.fire('ページが作成されました。', `[[${FullTitle}]]`, 'success').then(async (ok) => {
+                await Swal.fire(t("ページが作成されました。"), `[[${FullTitle}]]`, 'success').then(async (ok) => {
                   if (ok) {
                     //日付とリンクを先頭行にいれる
                     RecodeDateToPage(preferredDateFormat, "Reading", ` [[${FullTitle}]]`)
@@ -263,7 +268,7 @@ const choiceCreate = (radio: Element, selectKobo: HTMLSelectElement, closeModal:
         } else {
           //作成キャンセルボタン
           logseq.hideMainUI()
-          await logseq.UI.showMsg("キャンセルしました", "warning")
+          await logseq.UI.showMsg(t("キャンセルしました"), "warning")
           openModal()
           logseq.showMainUI()
         }
