@@ -1,7 +1,7 @@
 {
   "(推定)": "(Estimated)",
   "10桁もしくは13桁": "10 or 13 digits",
-  ">本 (楽天ブックス)": ">Books (Rakuten Books)",
+  "本 (楽天ブックス)": "Books (Rakuten Books)",
   "APIから取得したカバー画像をアセットに保存します。": "Save the cover image obtained from the API as an asset.",
   "ISBNで検索": "Search by ISBN",
   "すでにページが存在しています": "The page already exists",

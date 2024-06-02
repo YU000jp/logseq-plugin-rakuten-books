@@ -58,7 +58,7 @@ const model = {
       <main>
       <select id="selectKobo">
         <option value="Kobo">${t("電子書籍 (楽天Kobo)")}</option>
-        <option value="Books"${t(">本 (楽天ブックス)")}</option>
+        <option value="Books" selected="true">${t("本 (楽天ブックス)")}</option>
       </select>
         <form id="searchTitle">
           ${t("タイトルで検索")}
