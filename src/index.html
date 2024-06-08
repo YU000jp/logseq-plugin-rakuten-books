@@ -12,16 +12,43 @@
   <div id="app"></div>
   <script src="index.ts" type="module"></script>
   <style>
-    table#createTable td.ItemTitle {
-      width: 580px;
-    }
+    ul#createTable {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      list-style-type: none;
 
-    table#createTable td.ItemImg {
-      width: 130px;
-    }
+      & li.item {
 
-    table#createTable tr:hover {
-      background-color: lightyellow;
+        background-color: #fff;
+        padding: 30px;
+        max-width: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+
+        &:hover {
+          background-color: lightyellow;
+        }
+
+        & div.item-link {
+          color: #333;
+        }
+
+        & div.item-picture img {
+          width: 100%;
+          height: auto;
+        }
+
+        & div.item-title {
+          font-size: 18px;
+          font-weight: bold;
+          padding: 10px;
+        }
+
+        & div.item-text {
+          padding: 10px;
+        }
+      }
     }
 
     output#outputFromAPI {
