@@ -3,6 +3,9 @@
 - Utilize Rakuten books API to import book data
 > Rakuten books is a site from Japan.
 
+> [!WARNING]
+>このプラグインはLogseq dbバージョンでは動作しません。
+
 <div align="right">
 
 [![latest release version](https://img.shields.io/github/v/release/YU000jp/logseq-plugin-rakuten-books)](https://github.com/YU000jp/logseq-plugin-rakuten-books/releases)
