@@ -4,7 +4,7 @@
 > Rakuten books is a site from Japan.
 
 > [!NOTE]
-> このプラグインはLogseq dbバージョンでも動作します。
+> このプラグインは、Logseq ファイルベースのグラフで動作します。データベースのグラフでは動作しません。
 
 <div align="right">
 
